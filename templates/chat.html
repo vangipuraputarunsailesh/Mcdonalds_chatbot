@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>McDonald's Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #fffbe6;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            max-width: 420px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 24px 16px 16px 16px;
+            position: relative;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 16px auto;
+            width: 80px;
+        }
+        #chatbox {
+            width: 100%;
+            height: 340px;
+            border: 1px solid #ffd600;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-y: scroll;
+            background: #fffde7;
+            margin-bottom: 12px;
+        }
+        .user, .bot {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 16px;
+            max-width: 80%;
+            display: inline-block;
+            clear: both;
+        }
+        .user {
+            background: #ffd600;
+            color: #222;
+            float: right;
+            text-align: right;
+        }
+        .bot {
+            background: #e0e0e0;
+            color: #222;
+            float: left;
+            text-align: left;
+        }
+        #userinput {
+            width: 70%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ffd600;
+            outline: none;
+        }
+        #sendbtn {
+            width: 25%;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background: #ffd600;
+            color: #222;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 4px;
+        }
+        #sendbtn:hover {
+            background: #ffbc00;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <img src="/static/logo.png" alt="McDonald's Logo" class="logo">
+        <div id="chatbox"></div>
+        <div class="clearfix"></div>
+        <input type="text" id="userinput" placeholder="Type your message..." autofocus>
+        <button id="sendbtn">Send</button>
+    </div>
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const userinput = document.getElementById('userinput');
+        const sendbtn = document.getElementById('sendbtn');
+
+        function appendMessage(sender, text) {
+            const msg = document.createElement('div');
+            msg.className = sender + ' clearfix';
+            msg.innerHTML = text;
+            chatbox.appendChild(msg);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        sendbtn.onclick = function() {
+            const message = userinput.value.trim();
+            if (!message) return;
+            appendMessage('user', message);
+            userinput.value = '';
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            })
+            .then(response => response.json())
+            .then(data => appendMessage('bot', data.reply));
+        };
+
+        userinput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') sendbtn.onclick();
+        });
+
+        // Greet on load
+        appendMessage('bot', "👋 Welcome to McDonald's Chatbot! How may I assist you?");
+    </script>
+</body>
+</html>
